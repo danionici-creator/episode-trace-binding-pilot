@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+pilot/quick/
+pilot/iter5_k32/
+pilot/iter5_k8/

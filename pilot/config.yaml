@@ -1,0 +1,118 @@
+# Phase I simulation pilot -- preregistered configuration
+# Study 1, "Binding Episodes to Their Internal Effects" (H1, H2; M1, M2, leakage audit).
+#
+# Everything that defines the measurement (M, Phi), the environment, the self-model
+# architectures, the tuning budget and the analysis is fixed in this file before any
+# D/F result is computed. Notation follows the manuscript: h_t slow state, z_t
+# measurement, s_k trace signature, B binding, L_t log, y_k provenance label.
+
+meta:
+  version: 1
+  date: "2026-10-24"
+  sesoi_bss: 0.05              # working SESOI (manuscript Sec. 4.7)
+  alpha_two_sided: 0.0166667   # 0.05 / 3, confirmatory family of three tests
+  power: 0.90
+  n_workers: 6                 # measured: throughput saturates at ~3000 windows/s beyond 4-6 workers
+  threads_per_worker: 2
+
+seeds:
+  tuning: 1000                 # used only for hyperparameter selection and calibration
+  main: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# ---------------------------------------------------------------- environment
+environment:
+  routes: [own, imported, inferred]
+  route_probs: [0.3333333, 0.3333333, 0.3333334]   # i.i.d. per episode, independent of kind
+  n_kinds: 4                   # content kinds, i.i.d. uniform, independent of route
+  d_in: 24                     # cue (state-action) dimensionality = input of the plastic pathway
+  d_out: 12                    # outcome dimensionality
+  d_record: 16                 # descriptor of the episode record stored in the log L_t
+  cue_spread: 1.0              # item-specific part of a cue relative to its kind prototype
+  world_gain: 2.0              # o = tanh(A c), A ~ N(0, world_gain^2 / d_in)
+  steps_per_episode: 6         # fixed-length episodes (boundary rule identical across conditions)
+  episodes_per_window: 8       # episodes visible to the self-model per history window
+  burn_in_episodes: 2000       # discarded so that h is in its quasi-stationary regime
+  query_noise: 0.3             # retained proposition = record + noise (no verbatim lookup key)
+  own:                         # agent-environment interaction: repeated action-outcome trials
+    perceptual_noise: 0.6      # fresh sensory noise on the cue at every step
+    outcome_noise: 0.3         # environmental stochasticity of the observed outcome
+  imported:                    # message from a scripted other agent
+    comm_dim: 12               # the message conveys the cue through a 12-d shared code (lossy)
+    sender_model_error: 0.8    # sender reports tanh(A_s c), A_s = A + N(0, err^2 / d_in)
+    outcome_noise: 0.05
+  inferred:                    # internal recombination (rehearsal) of earlier content
+    blend: 0.4                 # x = unit((1-b) c + b c_j), c_j a previously acquired cue
+    infer_weight: 0.5          # target = (1-g) U x + g o : partly regenerated from slow memory U
+    memory_buffer: 64          # c_j drawn from the last 64 acquired cues (any route)
+
+# ---------------------------------------------------- path-dependent slow state
+plasticity:                    # h = (W, U); one rule for every route (same learning pathway)
+  eta: 0.25                    # delta rule: dW = eta (target - W x) x^T ...
+  k_wu: 0.02                   # ... - k_wu (W - U) + synaptic noise   (fast synapse -> slow)
+  k_uw: 0.01                   # dU = k_uw (W - U) - rho U             (two-variable chain)
+  rho: 0.0005
+  synaptic_noise: 0.002        # xi_t, also the source of test-retest variability for M1
+
+# ----------------------------------------------------------------- M and Phi
+measurement:
+  M: "z_t = R vec(h_t - h_{t-1}) / eta + eta_t ; R fixed Gaussian (d_z x 576), entries N(0, 1/d_z), seed R_seed ; eta_t ~ N(0, sigma_z^2 I)"
+  Phi: "s_k = concat( mean_{t in e_k} z_t , sd_{t in e_k} z_t )  (2 d_z sufficient statistics)"
+  d_z: 16
+  sigma_z: 0.25                # calibrated on the tuning seed only (0.05 saturated the M2 ceiling); see REPORT.md
+  R_seed: 20261024
+
+calibration_log:               # tuning seed 1000, M2 decoder only, no D/F model trained (16-episode windows)
+  - {sigma_z: 0.05, m2_full_bss: 0.867, note: "ceiling saturated: no room for a D-F difference"}
+  - {sigma_z: 0.25, m2_full_bss: 0.438, note: "chosen: moderate ceiling, s_only 0.434, no_z -0.000"}
+  - {sigma_z: 0.50, m2_full_bss: 0.081}
+  - {sigma_z: 1.00, m2_full_bss: 0.002}
+
+# ---------------------------------------------------------------------- data
+data:
+  n0_windows: 128              # n0 = 128 windows = 1024 labelled training episodes
+  budgets: [1, 4, 8, 16]       # learning curve, multiples of n0 (D0 and F0, diagnostic seeds only)
+  confirmatory_budget: 8       # 8 n0 = 1024 windows = 8192 training episodes (all conditions)
+  n_val_windows: 128
+  n_test_windows: 256          # 2048 novel test episodes per run
+  m2_multiplier: 10            # information-ceiling decoder: 10 x the confirmatory training episodes
+
+# --------------------------------------------------------------- self-models
+self_model:                    # shared backbone: memory-augmented transformer
+  d_model: 48
+  n_heads: 4
+  enc_layers: 2                # self-attention over [log tokens ; trace tokens ; signature tokens]
+  readout_layers: 2            # query cross-attention blocks
+  d_ff_D: 96
+  d_ff_F: auto                 # width compensation: chosen so |P_F - P_D| / P_D <= 2%
+  max_param_mismatch: 0.02
+  dropout: 0.0                 # regularisation through weight decay (tuning grid) and early stopping
+  time_freqs: 8                # sinusoidal timestamp features (shared by log and trace tokens)
+  signature_stream: true       # s_k also given to both models as an unbound stream (isolates B from Phi)
+
+training:
+  steps: 1200                  # identical number of optimisation steps for every condition
+  batch_windows: 32
+  eval_every: 100              # checkpoint selection on validation windows (same lambda as training)
+  selection_metric: val_bss
+  redraw_descriptors: true     # fresh record/query descriptors at every presentation of a training window
+  recompose_windows: true      # training windows re-assembled from random training episodes
+  tuning_grid:                 # identical tuning budget: 6 configurations per architecture
+    lr: [0.0003, 0.001, 0.003]
+    weight_decay: [0.0, 0.1]
+
+conditions:
+  lambdas: [0.0, 0.25, 0.5, 1.0]   # D_lambda (binding permuted) and F_lambda (trace stream permuted)
+  test_misbinding: true            # D_lambda^test: D0 evaluated with all test signatures permuted
+  f_noz: true                      # pipeline leakage audit: F trained and tested with z and s removed
+  f_long_step_multiplier: 4        # diagnostic: F0 with 4x optimisation steps (does F escape the join plateau?)
+  diagnostic_seeds: 5              # learning curve and F_long run on the first 5 main seeds (compute budget)
+
+# ------------------------------------------------------------------ checks
+checks:
+  m1_block_episodes: 200
+  m1_repeats: 10               # test-retest pairs and order permutations per seed
+  m1_quantile: 0.95            # delta_C = 95th percentile of test-retest distances
+  leakage_margin: 0.02         # non-trace decoder must be <= chance + 0.02 (BSS and accuracy)
+  decoder_hidden: 128
+  decoder_epochs: 12
+  ece_bins: 15

@@ -1,0 +1,7 @@
+{
+ "file": "config_iter5.yaml",
+ "sha256": "cc754c9b16c54f3fcf08089e16aca0fec43e4e3eece0036d12401d01e9da98a4",
+ "timestamp": "2026-10-25T13:10:58+02:00",
+ "timestamp_utc": "2026-10-25T11:10:58+00:00",
+ "note": "frozen before any run of iteration 5; no tuning in this iteration"
+}

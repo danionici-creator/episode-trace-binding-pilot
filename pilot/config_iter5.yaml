@@ -1,0 +1,70 @@
+# Simulation pilot, ITERATION 5 -- exploratory diagnostic of the K = 32 crossover.
+#
+# Iteration 4 found, on three seeds, that at 32 episodes per window D failed under the targeted
+# co-timed objective (T32) while F learned, and F failed under the generic masked-token objective
+# (G32) while D learned. Two reviews of the preprint asked (i) whether the crossover is robust beyond
+# three seeds and (ii) whether the T32 failure of D comes from an auto-encoding shortcut: in D the
+# co-timed objective reads the encoded record token, which already contains a linear projection of
+# s_k. This iteration answers both, adds a no-objective condition and a longer budget, and re-runs
+# three iteration-4 seeds from scratch as an audit of reproducibility.
+#
+# Every condition starts from a frozen iteration-4 condition (config_iter4.yaml, hash-checked) and
+# changes only what is listed. No tuning: hyperparameters are either the frozen iteration-4 values or
+# the iteration-3 tuned values, fixed here before any run. This file is frozen, and its SHA-256
+# recorded in config_iter5.freeze.json, before any run of this iteration starts.
+
+meta:
+  iteration: 5
+  status: exploratory
+  output_runs: results_iter5_runs.jsonl      # one line per finished run (resumable)
+  output_results: results_iter5.json
+  output_report: REPORT_iter5.md
+  design_notes: DESIGN_NOTES_iter5.md
+  n_workers: 6
+  threads_per_worker: 2
+
+base_config: config_iter4.yaml
+base_config_sha256: 5ede63717723e895e4f4a5d9aa11af719d18a41a979871e246293ab0611829d9
+
+seeds:
+  main: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]   # iteration-4 lives (re-simulated deterministically)
+  extension: [14, 15, 16, 17, 18, 19, 20]          # T32 and G32 were run on 11-13 only in iteration 4
+  short: [11, 12, 13]
+
+hp_iter3: {lr: 0.001, weight_decay: 0.1}            # iteration-3 tuned values (R), used where no tuning exists
+
+# Conditions, in priority order. "from" names the iteration-4 condition whose configuration is used.
+conditions:
+  T32_pre:   {from: T32, seeds: main, archs: [D], aux_prebind: true,
+              note: "frozen T32 settings; co-timed target predicted from a pass with the bound copy zeroed (F unchanged by construction: compare with T32 F)"}
+  T32_ext:   {from: T32, seeds: extension, archs: [D, F, Fnoz],
+              note: "frozen T32 settings, unchanged; extends T32 to ten seeds"}
+  G32_ext:   {from: G32, seeds: extension, archs: [D, F],
+              note: "frozen G32 settings, unchanged; extends G32 to ten seeds (F_noz from T32_ext)"}
+  T32_R:     {from: T32, seeds: main, archs: [D, F], hp: {lr: 0.001, weight_decay: 0.1, aux_cotimed_weight: 1.0},
+              note: "co-timed objective with the iteration-3 hyperparameters instead of those selected on a dead tuning seed"}
+  T32_R_pre: {from: T32, seeds: main, archs: [D], aux_prebind: true, hp: {lr: 0.001, weight_decay: 0.1, aux_cotimed_weight: 1.0},
+              note: "as T32_R, with the bound copy zeroed for the co-timed target (F unchanged: compare with T32_R F)"}
+  N32:       {from: T32, archs_seeds: {D: main, F: short}, hp: {lr: 0.001, weight_decay: 0.1, aux_cotimed_weight: 0.0},
+              note: "no auxiliary objective at K = 32"}
+  T32_long:  {from: T32, seeds: short, archs: [D], steps: 9600, note: "T32 D with twice the step budget"}
+  G32_long:  {from: G32, seeds: short, archs: [F], steps: 9600, note: "G32 F with twice the step budget"}
+  R_audit:   {from: R, seeds: short, archs: [D, F],
+              note: "clean re-run of iteration-4 R on seeds 11-13, compared with results_iter4.json"}
+
+analysis:
+  onset_bss: 0.05          # a run has passed the onset of learning if its test BSS >= SESOI (fixed before running)
+  onset_val_bss: 0.05      # time to onset: first evaluation step with validation BSS >= 0.05
+  audit_tolerance: 0.005   # R_audit: |re-run - recorded| test BSS per run
+  ceiling_fraction: 0.5    # M4 share, as in iteration 4
+
+# A priori readings (written before any run; see DESIGN_NOTES_iter5.md):
+#  T32_pre vs T32 (D): if D passes onset in most seeds only when the bound copy is zeroed for the target,
+#    the T32 failure is attributed to the auto-encoding shortcut; if D still fails, the shortcut is not a
+#    sufficient explanation.
+#  T32_R and T32_R_pre separate the hyperparameters selected on a dead tuning seed from the shortcut.
+#  T32_ext and G32_ext: the crossover is called robust if it holds in at least 8 of 10 seeds per condition.
+#  N32: whether either architecture learns at K = 32 without any auxiliary objective.
+#  *_long: whether failures at 4,800 steps are failures of onset within budget (learning with 9,600 steps)
+#    or persist with twice the budget.
+#  R_audit: reproduction is confirmed if every re-run lies within audit_tolerance of the recorded value.

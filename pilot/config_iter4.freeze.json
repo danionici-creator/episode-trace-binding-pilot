@@ -1,0 +1,6 @@
+{
+ "file": "config_iter4.yaml",
+ "sha256": "5ede63717723e895e4f4a5d9aa11af719d18a41a979871e246293ab0611829d9",
+ "timestamp": "2026-10-25T04:31:28+02:00",
+ "note": "frozen after tuning on seed 1000 and before any of seeds 11-20 was simulated"
+}

@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this code or these results, please cite the preprint listed under preferred-citation."
+type: software
+title: "Episode–Trace Binding Pilot: Code, Frozen Configurations, and Per-Run Results"
+version: "1.2"
+date-released: "2026-10-26"
+doi: "10.5281/zenodo.23667154"
+license: MIT
+authors:
+  - family-names: Ionici
+    given-names: Ioan Daniel
+    affiliation: "Independent Researcher, Oradea, Romania"
+    orcid: "https://orcid.org/0009-0009-8183-3656"
+keywords:
+  - source attribution
+  - self-model
+  - path dependence
+  - continual learning
+  - equivalence testing
+  - control competence
+preferred-citation:
+  type: article
+  title: "Does Explicit Episode–Trace Binding Help? An Exploratory Study with Information-Matched, Competence-Audited Controls"
+  authors:
+    - family-names: Ionici
+      given-names: Ioan Daniel
+      orcid: "https://orcid.org/0009-0009-8183-3656"
+  year: 2026
+  doi: "10.5281/zenodo.23666336"
+  publisher:
+    name: Zenodo
+  notes: "Preprint, version 1.2 (final). Pilot Evidence, Open Problems, and a Protocol for Testing Structural Priors."

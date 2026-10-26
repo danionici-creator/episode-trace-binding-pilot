@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this code or these results, please cite the preprint listed under preferred-citation."
+title: "Simulation pilot for: Does Explicit Episode–Trace Binding Help?"
+version: "1.2"
+license: MIT
+authors:
+  - family-names: Ionici
+    given-names: Ioan Daniel
+    affiliation: "Independent Researcher, Oradea, Romania"
+    orcid: "https://orcid.org/0009-0009-8183-3656"
+keywords:
+  - source attribution
+  - self-model
+  - path dependence
+  - continual learning
+  - equivalence testing
+  - control competence
+preferred-citation:
+  type: article
+  title: "Does Explicit Episode–Trace Binding Help? An Exploratory Study with Information-Matched, Competence-Audited Controls"
+  authors:
+    - family-names: Ionici
+      given-names: Ioan Daniel
+      orcid: "https://orcid.org/0009-0009-8183-3656"
+  year: 2026
+  notes: "Preprint, version 1.2 (final), 25 October 2026. Pilot Evidence, Open Problems, and a Protocol for Testing Structural Priors."
