@@ -14,8 +14,8 @@ folder [`pilot/`](pilot/); its documentation, levels of reproduction, and scope 
 The study is closed: no further experiments or versions are planned beyond the correction of errors. The broader
 research programme to which it belongs is set out in
 
-> Ionici, I. D. (2026). *A Time of Their Own: Agent-Held Temporal Evidence for Persistent AI Agents* (Version 1.0).
-> Zenodo. https://doi.org/10.5281/zenodo.23671715
+> Ionici, I. D. (2026). *A Time of Their Own: Agent-Held Temporal Evidence for Persistent AI Agents* (Version 1.1).
+> Zenodo. https://doi.org/10.5281/zenodo.23687300
 
 Issues that report errors, or questions about the code, are welcome.
 
