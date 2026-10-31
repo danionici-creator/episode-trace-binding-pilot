@@ -4,18 +4,18 @@ Code, frozen configurations, per-run results, and reports of the five explorator
 the preprint
 
 > Ionici, I. D. (2026). *Does Explicit Episode–Trace Binding Help? An Exploratory Study with Information-Matched,
-> Competence-Audited Controls* (Version 1.2). Zenodo. https://doi.org/10.5281/zenodo.23666336
+> Competence-Audited Controls* (Version 1.3). Zenodo. https://doi.org/10.5281/zenodo.23666335
 
 The archived, citable release of this code is on Zenodo:
-**https://doi.org/10.5281/zenodo.23667154** (version 1.2). This repository holds exactly the same content, in the
+**https://doi.org/10.5281/zenodo.23667153** (all versions; the current one is 1.3). This repository holds exactly the same content, in the
 folder [`pilot/`](pilot/); its documentation, levels of reproduction, and scope of verification are in
 [`pilot/README.md`](pilot/README.md). Commands in that README are run from the repository root.
 
 The study is closed: no further experiments or versions are planned beyond the correction of errors. The broader
 research programme to which it belongs is set out in
 
-> Ionici, I. D. (2026). *A Time of Their Own: Agent-Held Temporal Evidence for Persistent AI Agents* (Version 1.1).
-> Zenodo. https://doi.org/10.5281/zenodo.23687300
+> Ionici, I. D. (2026). *A Time of Their Own: Agent-Held Temporal Evidence for Persistent AI Agents*.
+> Zenodo. https://doi.org/10.5281/zenodo.23671714
 
 Issues that report errors, or questions about the code, are welcome.
 

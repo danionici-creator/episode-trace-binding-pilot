@@ -5,7 +5,7 @@ described in the preprint
 
 > Ioan Daniel Ionici (2026). *Does Explicit Episode–Trace Binding Help? An Exploratory Study with
 > Information-Matched, Competence-Audited Controls. Pilot Evidence, Open Problems, and a Protocol for Testing
-> Structural Priors.* Preprint, version 1.2 (final), 25 October 2026. ORCID 0009-0009-8183-3656.
+> Structural Priors.* Preprint, version 1.3, 1 November 2026. https://doi.org/10.5281/zenodo.23666335. ORCID 0009-0009-8183-3656.
 
 Code: MIT License (`LICENSE`). Configurations, results, reports, and documentation: CC BY 4.0
 (`LICENSE-DATA.md`). How to cite: `CITATION.cff`. All results are exploratory; no confirmatory data
@@ -37,7 +37,7 @@ provisional and may assess the formulation, the method, and the open problems on
 > reports remain valid.
 >
 > **Reproducing the manuscript tables.** `python pilot/reproduce_manuscript_tables.py` (Python and
-> NumPy only) recomputes every contrast reported in Tables 5, 7, 8 and 9 and Figure 2 of the preprint (version 1.2)
+> NumPy only) recomputes every contrast reported in Tables 5, 7, 8 and 9 and Figure 2 of the preprint (versions 1.2 and 1.3)
 > from the per-run scores in the result files, and checks the SHA-256 hashes of the frozen iteration-4 and
 > iteration-5 configurations.
 > This establishes the internal consistency of the reported numbers; it is not a substitute for
@@ -52,12 +52,17 @@ provisional and may assess the formulation, the method, and the open problems on
 > in every earlier configuration, so iterations 1-4 are unchanged): the co-timed target is then predicted from a
 > second encoder pass in which D's bound copy is zeroed.
 >
+> **One command.** `python pilot/reproduce_lite.py` runs three levels of verification in turn: the tables from the
+> saved results, the audit checks, and a smoke training of D and F on two seeds (about 7 minutes in all on six
+> workers); `--tables` runs the first only, with NumPy alone. **Environment:** `pip install --require-hashes -r
+> pilot/requirements.lock` installs the exact versions used, with hashes (version 1.3 of the archive).
+>
 > **Levels of reproduction.** Python and NumPy only: `reproduce_manuscript_tables.py`, `supplementary_analyses.py`,
 > `make_run_inventory.py` (internal consistency of the reported numbers). With the recorded PyTorch environment:
 > `audit_checks.py` and `iter5_run.py --report-only`. With hours of CPU time: every training run. All runs used one
 > Windows 11 machine with six worker processes of two threads each; with the same thread settings re-runs reproduce the
-> recorded scores exactly, with other thread counts decoder results differ by up to 0.002 BSS. No container image or
-> hashed lockfile is provided.
+> recorded scores exactly, with other thread counts decoder results differ by up to 0.002 BSS. No container image is
+> provided.
 >
 > **Run inventory and environment.** `python pilot/make_run_inventory.py` writes `runs_inventory.csv`, one row
 > per trained run (all runs of the five iterations: iteration, condition, architecture, lambda, budget,
@@ -73,7 +78,7 @@ M3 and the leakage audit.
 
 ```
 python pilot/run_pilot.py               # iteration 1, ~35 min on CPU -> results.json, REPORT.md
-python pilot/run_pilot.py --quick       # 2-minute smoke test -> quick/
+python pilot/run_pilot.py --quick       # smoke test, about 5 minutes on six workers -> quick/
 python pilot/run_pilot.py --report-only # re-render REPORT.md from results.json
 python pilot/calibrate_env.py measurement.sigma_z=0.25   # M2/M1 on the tuning seed only
 
@@ -127,7 +132,8 @@ Requirements: Python 3, numpy, scipy, PyYAML, PyTorch (CPU); exact versions in `
 | `iter4_run.py`, `results_iter4.json`, `REPORT_iter4.md`, `cache/per_episode_brier_iter4.npz` | iteration 4: main run on fresh seeds and outputs |
 | `DESIGN_NOTES_iter4.md` | iteration 4: procedure, tuning findings, deviations (included in REPORT_iter4.md) |
 
-| `reproduce_manuscript_tables.py` | recomputes Tables 5, 7, 8 and 9 and Figure 2 of the preprint (v1.2) from the result files; checks the iteration-4 and iteration-5 hashes |
+| `reproduce_manuscript_tables.py` | recomputes Tables 5, 7, 8 and 9 and Figure 2 of the preprint (v1.2 and v1.3) from the result files; checks the iteration-4 and iteration-5 hashes |
+| `reproduce_lite.py`, `requirements.lock` | one command for three levels of verification (tables, audit checks, smoke training); the exact environment with hashes |
 | `supplementary_analyses.py`, `results_supplementary.json` | onset times, margin and competence-threshold sensitivity, leakage calibration (no training) |
 | `audit_checks.py` | 20 automated checks of pairing, permutations, splits, alignment, isolation, determinism, and of where the co-timed objective reads (about a minute; requires PyTorch) |
 | `config_iter5.yaml`, `config_iter5.freeze.json`, `DESIGN_NOTES_iter5.md` | iteration 5: frozen configuration, freeze record, a priori readings |

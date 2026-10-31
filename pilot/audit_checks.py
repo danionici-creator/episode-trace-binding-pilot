@@ -12,7 +12,12 @@ import tempfile
 from pathlib import Path
 
 import numpy as np
-import torch
+
+try:
+    import torch
+except ImportError:
+    sys.exit("audit_checks.py needs PyTorch: pip install --require-hashes -r pilot/requirements.lock "
+             "(the scripts that need only NumPy are listed in README.md)")
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
